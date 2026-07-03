@@ -4,8 +4,8 @@ import com.kanak.freelancing.auth.dto.request.RegisterRequest;
 import com.kanak.freelancing.auth.dto.response.AuthResponse;
 import com.kanak.freelancing.auth.service.interfaces.AuthService;
 import com.kanak.freelancing.entity.User;
+import com.kanak.freelancing.exception.EmailAlreadyExistsException;
 import com.kanak.freelancing.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(RegisterRequest registerRequest){
 
         if(userRepository.existsByEmail(registerRequest.getEmail())){
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExistsException(registerRequest.getEmail());
         }
 
         User user = User.builder()
@@ -37,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
                 .enabled(true)
                 .emailVerified(false)
                 .build();
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         AuthResponse authResponse = new AuthResponse();
         authResponse.setMessage("Register successful");
